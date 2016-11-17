@@ -1,12 +1,10 @@
 import requests
 import argparse
-from path import Path
+from pathlib import Path
 import re
 
 
 access_token = "EAACEdEose0cBABKmf2X0nE5rV4j2PZBCN4r8SV7AuQtmi5lLZApOPgqkAS46g0HOKYo5f4oEBRRsWFgJshIEST0Uhvua8ZAF39vAel3aIuTusUNAZCa2GGdRQI538ZAkzaYvaVNVTifbgtmPU8zIkJhAggQptuPGJsbinzoVlOQZDZD"
-id = "1302510586443947"
-dir = "foulees_IDF"
 
 
 parser = argparse.ArgumentParser(usage="%(prog)s [-h] --album-url ALBUM_URL --dir DIR --token TOKEN\nPlease go to http://developers.facebook.com/tools/explorer/145634995501895/ to get a token.")
@@ -35,7 +33,8 @@ url = "https://graph.facebook.com/v2.8/" + album_id + "/photos?fields=images&lim
 
 try:
     Path(args.dir).mkdir()
-except:
+except Exception as e:
+    print(e)
     pass
 
 all_images = []
@@ -67,12 +66,12 @@ while True:
 
 def download(url):
     fname = url.split("/")[-1]
-    with open(dir + "/" + fname, "wb") as f:
+    with open(args.dir + "/" + fname, "wb") as f:
         f.write(requests.get(url).content)
     return url
 
 
 import concurrent.futures
-with concurrent.futures.ProcessPoolExecutor() as executor:
+with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
     for url in executor.map(download, all_images):
         print(url)
